@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Prediction Result</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Job Prediction Result</h1>
+        <div id="result" class="result"></div>
+    </div>
+
+    <script>
+        // Get URL parameters
+        const params = new URLSearchParams(window.location.search);
+        const name = params.get('name');
+        const age = params.get('age');
+        const education = params.get('education');
+        const district = params.get('district');
+
+        // Job Trends and Institutions data
+        const jobTrends = {
+            "Ariyalur": { jobs: "Cement industry, Agriculture, Government jobs", institutions: ["Government Arts College, Ariyalur", "Periyar Maniammai Institute of Science and Technology", "Dr. Navalar Nedunchezhiyan College of Engineering"] },
+            "Chennai": { jobs: "IT jobs, Software Development, Data Science, Finance, Healthcare", institutions: ["IIT Madras", "Anna University", "Madras Medical College"] },
+            "Coimbatore": { jobs: "Textile industry, Engineering jobs, IT Services, Manufacturing", institutions: ["PSG College of Technology", "Amrita Vishwa Vidyapeetham", "Coimbatore Institute of Technology"] },
+            "Cuddalore": { jobs: "Chemicals, Petrochemicals, Fishing, Agriculture", institutions: ["Krishnasamy College of Engineering", "St. Joseph’s College of Arts and Science", "CK College of Engineering and Technology"] },
+            "Dharmapuri": { jobs: "Agriculture, Horticulture, Sericulture", institutions: ["Government College of Engineering, Dharmapuri", "Sapthagiri College of Engineering", "Adhiyamaan College of Engineering"] },
+            "Dindigul": { jobs: "Textile, Leather industry, Agriculture", institutions: ["Gandhigram Rural Institute", "PSNA College of Engineering and Technology", "Mother Teresa Women's University"] },
+            "Erode": { jobs: "Textile industry, Agriculture, Dairy farming", institutions: ["Bannari Amman Institute of Technology", "Nandha Engineering College", "Institute of Road and Transport Technology"] },
+            "Kallakurichi": { jobs: "Agriculture, Sugar industry", institutions: ["Government College of Engineering, Kallakurichi", "Thiruvalluvar College of Engineering and Technology", "Vetri Vinayaha College of Engineering and Technology"] },
+            "Kanchipuram": { jobs: "Silk weaving, Electronics manufacturing", institutions: ["SRM Institute of Science and Technology", "Meenakshi Sundararajan Engineering College", "Chennai Mathematical Institute"] },
+            "Kanyakumari": { jobs: "Tourism, Fishing, Agriculture", institutions: ["Noorul Islam University", "Scott Christian College", "Nesamony Memorial Christian College"] },
+            "Karur": { jobs: "Textile, Paper industry, Agriculture", institutions: ["Karur Vysya Bank Employees Union Institute", "Government Arts College, Karur", "Kongu Engineering College"] },
+            "Krishnagiri": { jobs: "Horticulture, Electronics, Granite industry", institutions: ["Government College of Engineering, Bargur", "Adhiyamaan College of Engineering", "Er Perumal Manimekalai College of Engineering"] },
+            "Madurai": { jobs: "Manufacturing, Educational sector, IT", institutions: ["Madurai Kamaraj University", "Thiagarajar College of Engineering", "American College"] },
+            "Mayiladuthurai": { jobs: "Agriculture, Fishing", institutions: ["A.V.C. College of Engineering", "Government Arts College, Mayiladuthurai", "Cauvery College of Education"] },
+            "Nagapattinam": { jobs: "Fishing, Agriculture, Oil Refinery", institutions: ["E.G.S. Pillay Engineering College", "AVC College", "Government Arts College, Nagapattinam"] },
+            "Namakkal": { jobs: "Transport, Poultry farming", institutions: ["Paavai Engineering College", "Mahendra Engineering College", "K.S.R. College of Engineering"] },
+            "Nilgiris": { jobs: "Tourism, Tea plantation, Horticulture", institutions: ["Emerald Heights College for Women", "JSS College of Pharmacy", "CSI College of Engineering"] },
+            "Perambalur": { jobs: "Cement industry, Agriculture", institutions: ["Dhanalakshmi Srinivasan Engineering College", "Roever Engineering College", "Government Arts College, Perambalur"] },
+            "Pudukkottai": { jobs: "Agriculture, Granite industry", institutions: ["Mookambigai College of Engineering", "H.H. The Rajah's College", "Government Arts College, Pudukkottai"] },
+            "Ramanathapuram": { jobs: "Fishing, Salt production, Agriculture", institutions: ["Syed Ammal Engineering College", "Alagappa University", "Mohamed Sathak Engineering College"] },
+            "Ranipet": { jobs: "Leather industry, Electronics manufacturing", institutions: ["Adhiparasakthi Engineering College", "Thanthai Periyar Government Institute of Technology", "Sri Venkateswara College of Engineering"] },
+            "Salem": { jobs: "Agriculture, Textiles", institutions: ["Government College of Engineering, Salem", "Vinayaka Missions University", "Sona College of Technology"] },
+            "Sivaganga": { jobs: "Agriculture, Tourism", institutions: ["Alagappa University", "KLN College of Engineering", "Thiyagarajar College of Engineering"] },
+            "Tenkasi": { jobs: "Tourism, Agriculture", institutions: ["Sivanthi Aditanar College", "Sree Ayya Nadar Janaki Ammal College", "M.S. University College"] },
+            "Thanjavur": { jobs: "Agriculture, Arts and Crafts", institutions: ["SASTRA University", "Periyar Maniammai University", "Tamil University"] },
+            "Theni": { jobs: "Agriculture, Horticulture", institutions: ["Theni Government Medical College", "P.S.N.A. College of Engineering and Technology", "Kamaraj College of Engineering and Technology"] },
+            "Thoothukudi": { jobs: "Salt production, Fishing, Port-related jobs", institutions: ["St. Mary's College", "Anna University Regional Campus", "Government Polytechnic College, Thoothukudi"] },
+            "Tiruchirappalli": { jobs: "Engineering, Government jobs", institutions: ["National Institute of Technology, Trichy", "Bharathidasan University", "St. Joseph's College"] },
+            "Tirunelveli": { jobs: "Agriculture, Educational sector", institutions: ["Manonmaniam Sundaranar University", "Sarah Tucker College", "Government College of Engineering, Tirunelveli"] },
+            "Tirupathur": { jobs: "Leather industry, Agriculture", institutions: ["Sacred Heart College", "Government Arts and Science College, Tirupathur", "Dhanalakshmi Srinivasan College"] },
+            "Tiruppur": { jobs: "Textile industry, Garment manufacturing", institutions: ["Kumaraguru College of Technology", "Government College of Technology", "NIFT-TEA College of Knitwear Fashion"] },
+            "Tiruvallur": { jobs: "Manufacturing, Automobiles", institutions: ["Sriram Engineering College", "Prathyusha Engineering College", "Saveetha Engineering College"] },
+            "Tiruvannamalai": { jobs: "Agriculture, Handicrafts", institutions: ["Government Arts College, Tiruvannamalai", "SKP Engineering College", "Saraswathi College of Engineering"] },
+            "Tiruvarur": { jobs: "Agriculture, Fishing", institutions: ["Central University of Tamil Nadu", "Government Arts College, Tiruvarur", "A.V.C. College"] },
+            "Vellore": { jobs: "Leather industry, Healthcare", institutions: ["Christian Medical College", "VIT University", "Thanthai Periyar Government Institute of Technology"] },
+            "Viluppuram": { jobs: "Agriculture, Handloom", institutions: ["IFET College of Engineering", "Mailam Engineering College", "Government Arts College, Viluppuram"] },
+            "Virudhunagar": { jobs: "Fireworks industry, Agriculture", institutions: ["Kamaraj College of Engineering and Technology", "V.P.M.M. Engineering College", "Sethu Institute of Technology"] },
+        };
+
+        const resultDiv = document.getElementById('result');
+        if (district && jobTrends[district]) {
+            const prediction = jobTrends[district].jobs;
+            const institutions = jobTrends[district].institutions.join(", ");
+            
+            resultDiv.innerHTML = `
+                <h2>Prediction for ${district}</h2>
+                <p><strong>Name:</strong> ${name}</p>
+                <p><strong>Age:</strong> ${age}</p>
+                <p><strong>Education:</strong> ${education}</p>
+                <p><strong>Predicted Job Trends:</strong> ${prediction}</p>
+                <p><strong>Famous Institutions:</strong> ${institutions}</p>
+            `;
+        } else {
+            resultDiv.innerHTML = "<p>Sorry, we don't have data for this district yet.</p>";
+        }
+    </script>
+
+</body>
+</html>
